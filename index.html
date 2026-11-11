@@ -234,7 +234,7 @@ const pick=a=>({company:a.company,tag:a.tag,agent:a.agent,a1:a.a1,a2:a.a2,phone:
 P0=()=>({c:'',city:'',apt:'',term:'',date:'',time:''}),
 seg=()=>({al:'',ac:'',fn:'',dur:'',stops:'',f:P0(),t:P0()}),
 blank=()=>({id:'t'+Date.now(),pax:'',pnr:'',cls:'Economy',trip:'One-way',st:'Confirmed',issue:new Date().toISOString().slice(0,10),bc:'',bh:'',...pick(AGENCY),segs:[seg()]});
-let cur={...blank(),pax:'MR NUR MOHAMMAD ALI',pnr:'84DK4K',cls:'Economy (CLSAO)',issue:'2026-11-10',bc:'60 Kg',bh:'7 Kg (1 piece)',segs:[{al:'Biman Bangladesh',ac:'BG',fn:'136',dur:'08 hrs 20 mins',stops:'1 stop, via Chittagong',f:{c:'JED',city:'Jeddah',apt:'King Abdulaziz Intl',term:'Terminal H',date:'2026-11-12',time:'22:45'},t:{c:'DAC',city:'Dhaka',apt:'Hazrat Shahjalal Intl',term:'Terminal 2',date:'2026-11-13',time:'10:05'}}]};
+let cur={...blank(),pax:'MR NUR MOHAMMAD ALI',pnr:'84DK4K',cls:'Economy (CLSAO)',issue:'2026-11-10',bc:'60 Kg',bh:'7 Kg (1 piece)',segs:[{al:'Biman Bangladesh',ac:'BG',fn:'136',dur:'08 hrs 20 mins',stops:'Non Stop,f:{c:'JED',city:'Jeddah',apt:'King Abdulaziz Intl',term:'Terminal H',date:'2026-11-12',time:'22:45'},t:{c:'DAC',city:'Dhaka',apt:'Hazrat Shahjalal Intl',term:'Terminal 2',date:'2026-11-13',time:'10:05'}}]};
 let store=null,saved=[],dirty=0,loaded=0,tm;
 
 /* ticket */
