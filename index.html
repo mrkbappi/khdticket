@@ -45,6 +45,8 @@ summary{font-weight:800;cursor:pointer;margin-bottom:4px}
 .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .acts button{font:600 12px 'Plus Jakarta Sans',sans-serif;background:none;border:1px solid var(--u-ln);color:var(--u-ink);border-radius:8px;padding:6px 10px;cursor:pointer}
 .mut{color:var(--u-mut);padding:6px 2px}
+.tt{display:flex;gap:6px}.tt button{flex:1;font:700 13px 'Plus Jakarta Sans',sans-serif;padding:10px 6px;border:1.5px solid var(--u-ln);background:var(--u-in);color:var(--u-ink);border-radius:8px;cursor:pointer}.tt button.on{background:#d1202f;border-color:#d1202f;color:#fff}
+.f input[readonly]{opacity:.65}
 #wrap{overflow:hidden;border-radius:6px}
 #sheet{width:210mm;transform-origin:top left}
 #msg{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:#0a1f44;color:#fff;padding:10px 16px;border-radius:999px;font-weight:600;z-index:30;max-width:92%;text-align:center}
@@ -81,6 +83,7 @@ summary{font-weight:800;cursor:pointer;margin-bottom:4px}
 .airline-row .ic{color:var(--red);transform:rotate(90deg)}
 .airline-row span:last-child{color:var(--muted);font-weight:500}
 .airline-row b{color:var(--navy);font-weight:800}
+.tag{font-style:normal;background:var(--red-soft);color:var(--red-dark);font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px}
 .route{display:grid;grid-template-columns:1fr 50mm 1fr;gap:4mm;align-items:start;padding:28px 26px 26px}
 .apt.dest{text-align:right}
 .code{font-size:68px;font-weight:800;line-height:.95;letter-spacing:-2.5px}
@@ -238,6 +241,23 @@ function calc(i){
     s.dur=m>0?`${String(Math.floor(m/60)).padStart(2,'0')} hrs ${String(m%60).padStart(2,'0')} mins`:'';
     if(el){el.value=s.dur;el.placeholder=m>0?'':'Check dates and times'}}catch(e){}
 }
+const TRIPS=['One-way','Round trip','Multi-city'],
+setAp=(o,p)=>{o.c=p.c;o.city=p.city;o.apt=p.apt;o.term=p.term},
+hd=i=>cur.trip==='Round trip'?(i?'Return flight':'Outbound flight'):cur.trip==='Multi-city'?`Flight ${i+1}`:'Flight',
+tripCtl=()=>`<div class="f w2"><span>Trip type</span><div class="tt">${TRIPS.map(v=>`<button type="button" data-a="trip" data-v="${v}" class="${cur.trip===v?'on':''}">${v}</button>`).join('')}</div></div>`;
+function rev(){
+  const[a,b]=cur.segs;if(!b)return;
+  const c1=b.f.c!==a.t.c,c2=b.t.c!==a.f.c;
+  for(const k of['c','city','apt']){b.f[k]=a.t[k];b.t[k]=a.f[k]}
+  if(c1)b.f.term=defT(b.f.c);if(c2)b.t.term=defT(b.t.c);
+  for(const e of['f','t'])for(const k of['c','city','apt','term']){const i=document.querySelector(`[data-p="segs.1.${e}.${k}"]`);if(i&&i.value!==b[e][k])i.value=b[e][k]}
+}
+function setTrip(v){
+  cur.trip=v;let S=cur.segs;
+  if(v==='One-way')S=S.slice(0,1);
+  else{if(S.length<2){const n=seg();setAp(n.f,S[0].t);S.push(n)}if(v==='Round trip')S=S.slice(0,2)}
+  cur.segs=S;dirty=1;build();paint();
+}
 const SPR=`<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></symbol><symbol id="i-plane" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></symbol><symbol id="i-bag" viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M9 11v5M15 11v5M9 20v1.5M15 20v1.5"/></symbol><symbol id="i-pack" viewBox="0 0 24 24"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5M8 10h8"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol></defs></svg>`,
 MAP=`<svg class="map" viewBox="0 0 800 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M-10 150Q240 -40 470 60T820 30" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6 9"/><path d="M120 175Q420 20 760 140" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 8"/><circle cx="470" cy="60" r="5" fill="#fff"/><circle cx="760" cy="140" r="4" fill="#fff"/></svg>`,
 arc=st=>`<svg class="arc" viewBox="0 0 220 56" aria-hidden="true"><path d="M8 44Q110 -8 212 44" fill="none" stroke="#a9b6cf" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round"/><circle cx="8" cy="44" r="5" fill="#0a1f44"/><circle cx="212" cy="44" r="5" fill="#d1202f"/>${st?'<circle cx="110" cy="18" r="5.5" fill="#fff" stroke="#0a1f44" stroke-width="2.5"/>':''}<circle cx="59" cy="24.5" r="14" fill="#fff"/><use href="#i-plane" width="26" height="26" x="-13" y="-13" transform="translate(59 24.5) rotate(76)" style="color:#d1202f"/></svg>`;
@@ -254,7 +274,7 @@ let store=null,saved=[],dirty=0,loaded=0,tm;
 function tk(t){
   const N=t.pax.split('\n').map(s=>s.trim()).filter(Boolean),n=N.length||1,pl=n>1?'s':'',
   ap=(p,e)=>`<div class="code">${x(p.c)}</div><div class="city">${x(p.city)}</div><div class="time">${t12(p.time)}${e?` <em>(${esc(e)})</em>`:''}</div><div class="date">${fd(p.date)}</div><div class="term"><b>${x(p.apt)}</b>${esc(p.term)}</div>`,
-  sg=s=>{const dd=s.t.date&&s.f.date?Math.round((D(s.t.date)-D(s.f.date))/864e5):0;return`<div class="airline-row"><span><svg class="ic"><use href="#i-plane"/></svg>${x(s.al)}</span><span>Flight <b>${fno(s)}</b></span></div><div class="route"><div class="apt">${ap(s.f,s.f.time)}</div><div class="mid"><div class="dur">${esc(s.dur)}</div>${arc(s.stops&&!/non|direct/i.test(s.stops))}<div class="stops">${esc(s.stops)}</div></div><div class="apt dest">${ap(s.t,dd===1?'next day':dd>1?`+${dd} days`:s.t.time)}</div></div>`};
+  sg=(s,i)=>{const lb=t.trip==='Round trip'?(i?'Return':'Outbound'):t.trip==='Multi-city'?`Flight ${i+1}`:'',dd=s.t.date&&s.f.date?Math.round((D(s.t.date)-D(s.f.date))/864e5):0;return`<div class="airline-row"><span><svg class="ic"><use href="#i-plane"/></svg>${lb?`<i class="tag">${lb}</i>`:''}${x(s.al)}</span><span>Flight <b>${fno(s)}</b></span></div><div class="route"><div class="apt">${ap(s.f,s.f.time)}</div><div class="mid"><div class="dur">${esc(s.dur)}</div>${arc(s.stops&&!/non|direct/i.test(s.stops))}<div class="stops">${esc(s.stops)}</div></div><div class="apt dest">${ap(s.t,dd===1?'next day':dd>1?`+${dd} days`:s.t.time)}</div></div>`};
   return SPR+`<div class="page"><header class="head">${MAP}<div class="logo-wrap"><img src="${LOGO}" alt="${esc(t.company)}" onerror="this.replaceWith(this.alt)"></div><div class="head-title"><h1>E-Ticket</h1><p>${esc(t.company)}</p>${t.tag?`<em>${esc(t.tag==='Dream, trust'?'Dream, Trust, Success':t.tag)}</em>`:''}</div></header>
 <main class="main"><section class="pass"><div class="pass-top"><div class="pax${n>1?' m':''}"><small>Passenger${pl} (${n} adult${pl})</small>${(N.length?N:['—']).map(v=>`<strong>${esc(v)}</strong>`).join('')}</div><div class="badge"><svg class="ic"><use href="#i-check"/></svg>${x(t.st)}</div></div>${t.segs.map(sg).join('')}<div class="perf"></div>
 <div class="stub"><div class="cell pnr"><small>Booking reference (PNR)</small><span>${x(t.pnr)}</span></div><div class="cell"><small>Class</small><span>${x(t.cls)}</span></div><div class="cell"><small>Trip type</small><span>${x(t.trip)}</span></div><div class="cell"><small>Passengers</small><span>${n} Adult${pl}</span></div></div></section>
@@ -264,19 +284,19 @@ function tk(t){
 }
 
 /* form */
-const f=(l,p,t='text',w='',ls='')=>`<label class="f ${w}"><span>${l}</span><input type="${t}" data-p="${p}" value="${esc(get(cur,p))}"${ls?` data-sg="${ls}" autocomplete="off"`:''}></label>`,
-pt=(P,i,e)=>[['Airport code','c','text','','dc'],['City','city','text','','dy'],['Airport','apt','text','w2','da'],['Terminal','term','text','w2','tm'],['Date','date','date'],['Time','time','time']].map(([l,k,t,w,ls])=>f(l,P+k,t,w,ls)).join('');
+const f=(l,p,t='text',w='',ls='',ex='')=>`<label class="f ${w}"><span>${l}</span><input type="${t}" data-p="${p}" value="${esc(get(cur,p))}"${ls?` data-sg="${ls}" autocomplete="off"`:''}${ex?' '+ex:''}></label>`,
+pt=(P,i,e)=>[['Airport code','c','text','','dc'],['City','city','text','','dy'],['Airport','apt','text','w2','da'],['Terminal','term','text','w2','tm'],['Date','date','date'],['Time','time','time']].map(([l,k,t,w,ls])=>{const ro=cur.trip==='Round trip'&&i===1&&['c','city','apt'].includes(k);return f(l,P+k,t,w,ro?'':ls,ro?'readonly':'')}).join('');
 function form(){
   return `<div class="card"><h3>Passengers</h3><label class="f"><span>Full names, one per line</span><textarea rows="3" data-p="pax">${esc(cur.pax)}</textarea></label></div>
-<div class="card"><h3>Booking</h3><div class="g">${f('PNR / booking ref','pnr')}${f('Status','st','text','','stl')}${f('Class','cls','text','','cl')}${f('Trip type','trip','text','','tt')}${f('Issue date','issue','date')}<span></span>${f('Checked baggage','bc')}${f('Cabin baggage','bh')}</div></div>
-${cur.segs.map((s,i)=>{const P=`segs.${i}.`;return`<div class="card"><div class="row"><h3>Flight ${i+1}</h3>${cur.segs.length>1?`<button class="lnk" data-a="rm" data-i="${i}">Remove</button>`:''}</div><div class="g">${f('Airline',P+'al','text','','dn')}${f('Airline code',P+'ac','text','','dk')}${f('Flight no.',P+'fn')}${f('Duration (auto)',P+'dur')}${f('Stops',P+'stops','text','w2')}</div><h4>From</h4><div class="g">${pt(P+'f.',i,'f')}</div><h4>To</h4><div class="g">${pt(P+'t.',i,'t')}</div></div>`}).join('')}
-<button class="btn ghost wide" data-a="add">+ Add flight</button>
+<div class="card"><h3>Booking</h3><div class="g">${f('PNR / booking ref','pnr')}${f('Status','st','text','','stl')}${f('Class','cls','text','','cl')}${f('Issue date','issue','date')}${tripCtl()}${f('Checked baggage','bc')}${f('Cabin baggage','bh')}</div></div>
+${cur.segs.map((s,i)=>{const P=`segs.${i}.`;return`<div class="card"><div class="row"><h3>${hd(i)}</h3>${cur.trip==='Multi-city'&&cur.segs.length>2?`<button class="lnk" data-a="rm" data-i="${i}">Remove</button>`:''}</div><div class="g">${f('Airline',P+'al','text','','dn')}${f('Airline code',P+'ac','text','','dk')}${f('Flight no.',P+'fn')}${f('Duration (auto)',P+'dur')}${f('Stops',P+'stops','text','w2')}</div><h4>From</h4><div class="g">${pt(P+'f.',i,'f')}</div><h4>To</h4><div class="g">${pt(P+'t.',i,'t')}</div></div>`}).join('')}
+${cur.trip==='Multi-city'?'<button class="btn ghost wide" data-a="add">+ Add flight</button>':''}
 <details class="card"><summary>Agency details</summary><div class="g">${f('Company','company')}${f('Tagline','tag')}${f('Agent name','agent','text','w2')}${f('Address line 1','a1')}${f('Address line 2','a2')}${f('Phone','phone','text','w2')}</div></details>
 <datalist id="stl"><option>Confirmed<option>On hold<option>Ticketed</datalist><datalist id="cl"><option>Economy<option>Premium Economy<option>Business<option>First</datalist><datalist id="tt"><option>One-way<option>Round trip<option>Multi-city</datalist>`;
 }
 const build=()=>{$('#pDetails').innerHTML=form()},
 fit=()=>{const w=$('#wrap'),s=$('#sheet'),k=Math.min(1,w.clientWidth/794);if(!w.clientWidth)return;s.style.transform=`scale(${k})`;w.style.height=s.offsetHeight*k+'px'},
-paint=()=>{$('#sheet').innerHTML=tk(cur);fit()},
+paint=()=>{if(cur.trip==='Round trip')rev();$('#sheet').innerHTML=tk(cur);fit()},
 toast=m=>{const e=$('#msg');e.textContent=m;e.hidden=false;clearTimeout(tm);tm=setTimeout(()=>e.hidden=true,3200)},
 tab=t=>{document.body.dataset.tab=t;requestAnimationFrame(fit)},
 rt=t=>t.segs.map(s=>(s.f.c||'?')+'–'+(s.t.c||'?')).join(', ');
@@ -312,8 +332,7 @@ async function save(){
 }
 async function dl(){
   const html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>E-Ticket ${esc(cur.pnr)}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>${$('#tcss').textContent}body{margin:0;background:#cfd5e3;padding:20px}.page{margin:0 auto}.np{text-align:center;margin-bottom:14px}@media print{html,body{height:297mm;overflow:hidden;background:none;padding:0}.np{display:none}}</style></head><body><p class="np"><button onclick="print()" style="padding:10px 20px;font-weight:700">Print / Save as PDF</button></p>${tk(cur)}<script>addEventListener('beforeprint',()=>{const p=document.querySelector('.page');p.style.zoom=1;const h=p.offsetHeight;p.style.zoom=h>1122?1122/h:1})<\/script></body></html>`;
-  const fn=`E-Ticket-${(cur.pnr||'ticket').replace(/\W/g,'')}.html`;
-  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();toast('Ticket file ready')}
+  try{const d=await claude.use('downloads');if(!d)throw 0;await d.save({filename:`E-Ticket-${(cur.pnr||'ticket').replace(/\W/g,'')}.html`,data:html});toast('Ticket file ready')}
   catch(e){toast('Download is not available here. Use Print / PDF.')}
 }
 function openT(t,asNew){cur=JSON.parse(JSON.stringify(t));delete cur.upd;if(asNew){cur.id='t'+Date.now();cur.pax='';cur.pnr=''}dirty=1;build();paint();tab('details');window.scrollTo(0,0)}
@@ -333,7 +352,8 @@ document.addEventListener('click',e=>{
   else if(a==='save')save();
   else if(a==='print'){try{window.print()}catch(er){toast('Printing is blocked in this view. Open the page in your browser and try again.')}}
   else if(a==='dl')dl();
-  else if(a==='add'){cur.segs.push(seg());build();paint()}
+  else if(a==='add'){const n=seg(),p=cur.segs[cur.segs.length-1];if(p)setAp(n.f,p.t);cur.segs.push(n);build();paint()}
+  else if(a==='trip')setTrip(b.dataset.v)
   else if(a==='rm'){cur.segs.splice(+b.dataset.i,1);build();paint()}
   else if(a==='open'&&t)openT(t,0);
   else if(a==='dup'&&t)openT(t,1);
